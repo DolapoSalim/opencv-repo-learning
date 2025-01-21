@@ -2,43 +2,45 @@ import numpy as np
 import pylab as pl
 
 def regb2gray(rgb):
-    r, g, b = rgb[:,:,0], rgb[:,:,1], rgb[:,:,2]
-    gray = 0.2989*r + 0.5870*g + 0.1140*b
+    """Convert an RGB image to grayscale."""
+    r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
+    gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
+    return gray
 
-image = regb2gray (pl.imread('fractal.png'))
+# Load and process the image
+image_path = 'C:/Users/dolap/Downloads/Sierpinski_triangle.png'
+rgb_image = pl.imread(image_path)
+image = regb2gray(rgb_image)
 
-# finding all the non-zero pixels
-pixels = []
-for i in range(image.shape[0]):
-    for j in range(image.shape[1]):
-        if image[i,j] > 0:
-            pixels.append((i,j))
+# Find non-zero pixels
+pixels = np.argwhere(image > 0)
 
-Lx = image.shape[1]
-Ly = image.shape[0]
-print (Lx, Ly)
-pixels = pl.array(pixels)
-print (pixels.shape)
+Lx, Ly = image.shape[1], image.shape[0]
+print(Lx, Ly)
+print(pixels.shape)
 
-# computing the fractal dimension
-# consider only scales in a logarithmic list
+# Compute the fractal dimension
 scales = np.logspace(0.01, 1, num=10, endpoint=False, base=2)
 Ns = []
-# loop over several scales
+
 for scale in scales:
-    print ("======= Scale :", scale)
-    # computing the histogram
-    H, edges = np.histogramdd(pixels, bins=(np.arange(0,Lx,scale),np.arange(0,Ly,scale)))
-    Ns.append(np.sum(H>0))
+    print("======= Scale:", scale)
+    bins_x = np.arange(0, Lx, scale)
+    bins_y = np.arange(0, Ly, scale)
+    H, edges = np.histogramdd(pixels, bins=(bins_x, bins_y))
+    Ns.append(np.sum(H > 0))
 
-# linear fit, polynomial of degree 1
-ceoffs = np.polyfit(np.log(scales), np.log(Ns), 1)
+# Linear fit
+coeffs = np.polyfit(np.log(scales), np.log(Ns), 1)
 
+# Plotting
 pl.plot(np.log(scales), np.log(Ns), 'o', mfc='none')
-pl.plot(np.log(scales), np.polyval(ceoffs, np.log(scales)))
+pl.plot(np.log(scales), np.polyval(coeffs, np.log(scales)))
 pl.xlabel('log $\epsilon$')
 pl.ylabel('log N')
 pl.savefig('fractal.png')
 
-print ("The Hausdorff dimension is", -ceoffs[0]) # the fractal dimension is the OPPOSITE of the fitting coefficient
-np.savetxt('fractal_dimension_scaling.txt', np.array([-ceoffs[0]]))
+# Output results
+fractal_dimension = -coeffs[0]
+print("The Hausdorff dimension is", fractal_dimension)
+np.savetxt('fractal_dimension_scaling.txt', np.array([fractal_dimension]))
