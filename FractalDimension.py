@@ -23,7 +23,7 @@ print (pixels.shape)
 # computing the fractal dimension
 # consider only scales in a logarithmic list
 scales = np.logspace(0.01, 1, num=10, endpoint=False, base=2)
-Ns[]
+Ns = []
 # loop over several scales
 for scale in scales:
     print ("======= Scale :", scale)
@@ -34,7 +34,7 @@ for scale in scales:
 # linear fit, polynomial of degree 1
 ceoffs = np.polyfit(np.log(scales), np.log(Ns), 1)
 
-py.plot(np.log(scales), np.log(Ns), 'o', mfc='none')
+pl.plot(np.log(scales), np.log(Ns), 'o', mfc='none')
 pl.plot(np.log(scales), np.polyval(ceoffs, np.log(scales)))
 pl.xlabel('log $\epsilon$')
 pl.ylabel('log N')
